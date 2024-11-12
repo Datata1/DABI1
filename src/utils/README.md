@@ -1,0 +1,1 @@
+Dieser Ordner ist für alle utility scripts die wir nicht in unseren notebooks haben wollen.

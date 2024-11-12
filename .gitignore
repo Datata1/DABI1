@@ -1,3 +1,4 @@
 Daten/*.csv
+pgdata/
 
 .env
