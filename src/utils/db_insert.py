@@ -22,20 +22,16 @@ def insert_data_from_csv(csv_path, session, model_class, field_mapping, batch_si
             batch = []
 
             for row in reader:
-                # Konvertiere leere Strings in None
                 row = {key: (value if value != '' else None) for key, value in row.items()}
                 
-                # Mapping der CSV-Spaltennamen auf Modelldatenbank-Felder
                 data = {field: row[column] for field, column in field_mapping.items()}
                 batch.append(data)
 
-                # Wenn die Batch-Größe erreicht ist, wird die Batch eingefügt und geleert
                 if len(batch) >= batch_size:
                     session.bulk_insert_mappings(model_class, batch)
                     session.commit()
                     batch = []
 
-            # Restliche Daten in der Batch einfügen
             if batch:
                 session.bulk_insert_mappings(model_class, batch)
                 session.commit()

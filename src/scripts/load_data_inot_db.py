@@ -14,8 +14,6 @@ from utils.db_insert import (
 )
 
 
-
-
 def main():
     engine = get_engine()
 
