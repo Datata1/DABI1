@@ -2,8 +2,8 @@ import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-def get_engine():
-    database_path = "sqlite:///DABI1.db"  
+def get_engine(path: str = "sqlite:///DABI1.db"):
+    database_path = path  
     
     engine = create_engine(database_path)
     try:
