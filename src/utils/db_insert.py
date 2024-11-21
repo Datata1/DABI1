@@ -22,20 +22,16 @@ def insert_data_from_csv(csv_path, session, model_class, field_mapping, batch_si
             batch = []
 
             for row in reader:
-                # Konvertiere leere Strings in None
                 row = {key: (value if value != '' else None) for key, value in row.items()}
                 
-                # Mapping der CSV-Spaltennamen auf Modelldatenbank-Felder
                 data = {field: row[column] for field, column in field_mapping.items()}
                 batch.append(data)
 
-                # Wenn die Batch-Größe erreicht ist, wird die Batch eingefügt und geleert
                 if len(batch) >= batch_size:
                     session.bulk_insert_mappings(model_class, batch)
                     session.commit()
                     batch = []
 
-            # Restliche Daten in der Batch einfügen
             if batch:
                 session.bulk_insert_mappings(model_class, batch)
                 session.commit()
@@ -93,5 +89,36 @@ def insert_order_data(csv_path, session):
     insert_data_from_csv(csv_path, session, Order, field_mapping)
 
 
-def insert_tip_bools(csv_data, session):
-    pass
+def insert_tip_bools(csv_path, session, batch_size=1000):
+    """
+    Liest die tip-Daten aus einer CSV-Datei und aktualisiert die Order-Tabelle
+    mit den Bool-Werten in der 'tip' Spalte in Batches mithilfe von bulk_update_mappings.
+    """
+    try:
+        with open(csv_path, newline='', encoding='utf-8-sig') as csvfile:
+            reader = csv.DictReader(csvfile)
+            updates = []
+
+            for row in reader:
+                order_id = int(row['order_id'])
+                tip = row['tip'].strip().lower() == 'true'
+
+                order = session.query(Order).filter(Order.order_id == order_id).first()
+                if order and order.tips != tip:  
+                    updates.append({'order_id': order_id, 'tips': tip})
+
+                if len(updates) >= batch_size:
+                    session.bulk_update_mappings(Order, updates)
+                    session.commit()
+                    updates = []  
+
+            if updates:  
+                session.bulk_update_mappings(Order, updates)
+                session.commit()
+
+            print("Tip-Werte wurden erfolgreich in Batches in die Order-Tabelle eingefügt.")
+    except SQLAlchemyError as e:
+        print("Fehler beim Aktualisieren der Order-Tabelle mit Tip-Werten:", e)
+        session.rollback()
+
+

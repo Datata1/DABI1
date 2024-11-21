@@ -10,17 +10,18 @@ from utils.db_insert import (
     insert_product_data,
     insert_aisle_data,
     insert_departments_data,
-    insert_einkaufskorb_data
+    insert_einkaufskorb_data,
+    insert_tip_bools
 )
-
-
 
 
 def main():
     engine = get_engine()
 
+    
     Base.metadata.drop_all(engine)
     print("Tabellen wurden gelöscht.")
+
 
     Base.metadata.create_all(engine)
     print("Tabellen wurden erstellt.")
@@ -34,14 +35,17 @@ def main():
         aisle_data_path = os.path.join(data_dir, 'aisles.csv')
         department_data_path = os.path.join(data_dir, 'departments.csv')
         einkaufskorb_data_path = os.path.join(data_dir, 'oder_products_s.csv')
-
+        tips_data_path = os.path.join(data_dir, 'tips.csv')
+        
         
         insert_aisle_data(aisle_data_path, session)
         insert_departments_data(department_data_path, session)
         insert_order_data(order_data_path, session)
+        insert_tip_bools(tips_data_path, session)
         insert_product_data(product_data_path, session)
         insert_einkaufskorb_data(einkaufskorb_data_path, session)
-
+        
+        
     except SQLAlchemyError as e:
         print("Fehler beim Einfügen in die Datenbank:", e)
         session.rollback()
